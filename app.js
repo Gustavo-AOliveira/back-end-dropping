@@ -1,9 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2/promise');
+const cors = require('cors');
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+app.use(cors());
 
 app.use(bodyParser.json());
 
@@ -28,22 +31,22 @@ async function testDatabaseConnection() {
 
 app.post('/api/products', async (req, res) => {
     try {
-      const { brand, name, size, Colour, Image, Gender } = req.body;
+      const { brand, name, size, color, image, gender } = req.body;
   
-      if (brand === undefined || name === undefined || size === undefined || Colour === undefined || Image === undefined || Gender === undefined) {
+      if (brand === undefined || name === undefined || size === undefined || color === undefined || image === undefined || gender === undefined) {
         return res.status(400).json({ error: 'Campos obrigatórios faltando ou com valor indefinido' });
       }
   
       const connection = await mysql.createConnection(dbConfig);
   
       const [result] = await connection.execute(
-        'INSERT INTO produtos (brand, name, Size, Colour, Image, Gender) VALUES (?, ?, ?, ?, ?, ?)',
-        [brand, name, size, Colour, Image, Gender]
+        'INSERT INTO produtos (brand, name, size, color, image, gender) VALUES (?, ?, ?, ?, ?, ?)',
+        [brand, name, size, color, image, gender]
       );
   
       await connection.end();
   
-      res.status(201).json({ id: result.insertId, brand, name, size, Colour, Image, Gender });
+      res.status(201).json({ id: result.insertId, brand, name, size, color, image, gender });
     } catch (error) {
       console.error('Erro ao criar o produto:', error);
       res.status(500).json({ error: 'Erro ao criar o produto' });
@@ -83,17 +86,17 @@ app.delete('/api/products/:id', async (req, res) => {
 
   app.put('/api/products/:id', async (req, res) => {
   try {
-    const { brand, name, Size, Colour, Image, Gender } = req.body;
+    const { brand, name, size, color, image, gender } = req.body;
     const { id } = req.params;
 
-    if (brand === undefined || name === undefined || Size === undefined || Colour === undefined || Image === undefined || Gender === undefined) {
+    if (brand === undefined || name === undefined || size === undefined || color === undefined || image === undefined || gender === undefined) {
       return res.status(400).json({ error: 'Campos obrigatórios faltando ou com valor indefinido' });
     }
 
     const connection = await mysql.createConnection(dbConfig);
 
     const [result] = await connection.execute(
-        'UPDATE produtos SET brand=?, name=?, Size=?, Colour=?, Image=?, Gender=? WHERE id=?', [brand, name, Size, Colour, Image, Gender, id]
+        'UPDATE produtos SET brand=?, name=?, size=?, color=?, image=?, gender=? WHERE id=?', [brand, name, size, color, image, gender, id]
 
     );
 
@@ -102,7 +105,7 @@ app.delete('/api/products/:id', async (req, res) => {
     if (result.affectedRows === 0) {
       res.status(404).json({ error: 'Produto não encontrado' });
     } else {
-      res.json({ id, brand, name, Size, Colour, Image, Gender });
+      res.json({ id, brand, name, size, color, image, gender });
     }
   } catch (error) {
     console.error('Erro ao atualizar o produto:', error);
