@@ -65,6 +65,26 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
+app.get('/api/products/:id', async (req, res) => {
+  try {
+    const productId = req.params.id;
+
+    const connection = await mysql.createConnection(dbConfig);
+    
+    const [rows] = await connection.execute('SELECT * FROM produtos WHERE id = ?', [productId]);
+  
+    await connection.end();
+    if (rows.length > 0) {
+      res.json(rows[0]); 
+    } else {
+      res.status(404).json({ error: 'Produto não encontrado' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao buscar produto por ID' });
+  }
+});
+
 app.delete('/api/products/:id', async (req, res) => {
     try {
       const { id } = req.params;
